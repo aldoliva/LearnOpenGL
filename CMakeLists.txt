@@ -9,7 +9,7 @@ link_directories(${CMAKE_SOURCE_DIR}/third_party/GLFW/lib)
 
 # glad
 include_directories(${CMAKE_SOURCE_DIR}/third_party/glad/include)
-add_library(glad STATIC third_party/glad/src/glad.c)
+add_library(glad STATIC ${CMAKE_SOURCE_DIR}/src/glad.c)
 
 include_directories(includes)
 
@@ -28,10 +28,15 @@ SET(01_Getting_Started
         06_03_shaders_exercise3
 )
 
-find_library(OPENGL_LIBRARY OpenGL)
-find_library(COCOA_LIBRARY Cocoa)
-find_library(IOKIT_LIBRARY IOKit)
-set(APPLE_LIBRARIES ${OPENGL_LIBRARY} ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
+if (APPLE)
+    find_library(OPENGL_LIBRARY OpenGL)
+    find_library(COCOA_LIBRARY Cocoa)
+    find_library(IOKIT_LIBRARY IOKit)
+    set(LIBS ${OPENGL_LIBRARY} ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
+elseif (WIN32)
+    find_package(OpenGL REQUIRED)
+    set(LIBS ${OpenGL_GL_LIBRARY})
+endif ()
 
 foreach (CHAPTER ${CHAPTERS})
     foreach (EXERCISE ${${CHAPTER}})
@@ -42,7 +47,7 @@ foreach (CHAPTER ${CHAPTERS})
         string(SUBSTRING ${EXERCISE} 6 100 NAME)
         add_executable(${NAME} ${SOURCE}
                 includes/learnopengl/shader_s.h)
-        target_link_libraries(${NAME} glfw3 glad ${APPLE_LIBRARIES})
+        target_link_libraries(${NAME} glfw3 glad ${LIBS})
         target_compile_definitions(${NAME} PRIVATE SHADER_DIR="${CMAKE_SOURCE_DIR}/src/${CHAPTER}/${EXERCISE}")
         message(STATUS "SHADER_DIR for ${NAME}: ${CMAKE_SOURCE_DIR}/src/${CHAPTER}/${EXERCISE}")
     endforeach (EXERCISE)
