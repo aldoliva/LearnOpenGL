@@ -4,11 +4,13 @@ project(LearnOpenGL)
 set(CMAKE_CXX_STANDARD 20)
 
 # glfw
-include_directories(${CMAKE_SOURCE_DIR}/third_party/GLFW/include)
-link_directories(${CMAKE_SOURCE_DIR}/third_party/GLFW/lib)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build GLFW documentation" FORCE)
+add_subdirectory(third_party/GLFW)
+include_directories(third_party/GLFW/include)
 
-include_directories(${CMAKE_SOURCE_DIR}/third_party/glad/include)
-#add_library(glad STATIC third_party/glad/src/glad.c)
+#glad
+add_subdirectory(third_party/glad)
+include_directories(third_party/glad/include)
 
 include_directories(includes)
 
@@ -41,9 +43,6 @@ endif ()
 # stb_image
 add_library(STB_IMAGE "src/stb_image.cpp")
 set(LIBS ${LIBS} STB_IMAGE)
-# glad
-add_library(GLAD "src/glad.c")
-set(LIBS ${LIBS} GLAD)
 
 foreach (CHAPTER ${CHAPTERS})
     foreach (EXERCISE ${${CHAPTER}})
@@ -53,7 +52,7 @@ foreach (CHAPTER ${CHAPTERS})
         )
         string(SUBSTRING ${EXERCISE} 6 100 NAME)
         add_executable(${NAME} ${SOURCE})
-        target_link_libraries(${NAME} glfw3 ${LIBS})
+        target_link_libraries(${NAME} glfw glad ${LIBS})
         target_compile_definitions(${NAME} PRIVATE SHADER_DIR="${CMAKE_SOURCE_DIR}/src/${CHAPTER}/${EXERCISE}")
     endforeach (EXERCISE)
 endforeach (CHAPTER)
